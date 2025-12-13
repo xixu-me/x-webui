@@ -1,0 +1,69 @@
+{
+    "dns": {
+        "servers": ["https+local://1.1.1.1/dns-query", "localhost"]
+    },
+    "routing": {
+        "rules": [
+            {
+                "ip": ["geoip:private"],
+                "outboundTag": "block"
+            },
+            {
+                "ip": ["geoip:cn"],
+                "outboundTag": "block"
+            }
+        ]
+    },
+    "inbounds": [
+        {
+            "port": 443,
+            "protocol": "vless",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "${ID}",
+                        "flow": "xtls-rprx-vision"
+                    }
+                ],
+                "decryption": "none",
+                "fallbacks": [
+                    {
+                        "dest": 8888
+                    }
+                ]
+            },
+            "streamSettings": {
+                "security": "tls",
+                "tlsSettings": {
+                    "rejectUnknownSni": true,
+                    "alpn": "http/1.1",
+                    "minVersion": "1.2",
+                    "certificates": [
+                        {
+                            "certificateFile": "/home/${USERNAME}/cert/x.crt",
+                            "keyFile": "/home/${USERNAME}/cert/x.key"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "freedom",
+            "tag": "direct"
+        },
+        {
+            "protocol": "blackhole",
+            "tag": "block"
+        }
+    ],
+    "policy": {
+        "levels": {
+            "0": {
+                "handshake": 2,
+                "connIdle": 150
+            }
+        }
+    }
+}
